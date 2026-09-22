@@ -175,8 +175,8 @@ def send_nexora_otp(recipient, otp):
         "— NEXORA Security"
     )
 
-    with smtplib.SMTP(host, port, timeout=20) as server:
-        server.starttls()
+    with smtplib.SMTP_SSL(host, port, timeout=20, local_hostname="localhost") as server:
+  
         server.login(username, password)
         server.send_message(msg)
 
@@ -264,44 +264,75 @@ def verify_otp_code(user_id, code):
 def auth_css():
     st.markdown(r"""
     <style>
-    .auth-wrap{max-width:900px;margin:2.5vh auto 0;padding:0 24px 40px}
-    .auth-page-header{text-align:center;margin-bottom:24px}
-    .auth-n-mark{width:52px;height:52px;margin:0 auto 12px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-family:Orbitron,sans-serif;font-size:32px;font-weight:900;color:#fff;background:linear-gradient(135deg,#18cfff,#7040ff);box-shadow:0 0 28px rgba(35,190,255,.22),0 0 34px rgba(112,64,255,.16)}
-    .auth-brand{color:#f7faff;font-family:Orbitron,sans-serif;font-size:34px;font-weight:900;letter-spacing:5px;line-height:1.05}
-    .auth-brand span{color:#39d5ff}
-    .auth-command-label{color:#7890b7;font-size:12px;letter-spacing:4px;margin-top:10px;text-transform:uppercase}
-    .auth-card{position:relative;overflow:hidden;max-width:760px;margin:0 auto;padding:38px 46px 32px;background:linear-gradient(145deg,rgba(9,17,39,.98),rgba(7,12,29,.98));border:1px solid rgba(74,157,255,.30);border-radius:24px;box-shadow:0 28px 90px rgba(0,0,0,.46),0 0 65px rgba(37,116,255,.10),inset 0 1px 0 rgba(255,255,255,.055)}
-    .auth-card:before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#16cfff,#286fff,#7d42ff)}
-    .auth-card:after{content:"";position:absolute;width:420px;height:420px;right:-230px;top:-260px;border-radius:50%;border:1px solid rgba(49,207,255,.12);box-shadow:0 0 0 45px rgba(90,70,255,.025),0 0 0 90px rgba(90,70,255,.018);pointer-events:none}
-    .auth-steps{display:flex;align-items:center;justify-content:center;gap:0;margin:25px auto 30px;max-width:590px;position:relative;z-index:1}
-    .auth-step-item{display:flex;align-items:center;gap:9px;color:#62789f;white-space:nowrap;font-size:11px;letter-spacing:.7px}
-    .auth-step-dot{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid rgba(101,139,195,.30);background:rgba(255,255,255,.025);font-size:13px;font-weight:700;color:#7188ae}
-    .auth-step-item.active{color:#edfaff;font-weight:700}
-    .auth-step-item.active .auth-step-dot{border-color:#28d7ff;background:rgba(35,196,255,.12);color:#3ddcff;box-shadow:0 0 0 4px rgba(35,196,255,.055),0 0 24px rgba(35,196,255,.18)}
-    .auth-step-line{height:1px;width:82px;background:linear-gradient(90deg,rgba(83,136,201,.38),rgba(83,136,201,.12));margin:0 16px}
-    .auth-form-area{position:relative;z-index:1;max-width:620px;margin:0 auto}
-    .auth-form-title{text-align:center;color:#f5f8ff;font-size:32px;font-weight:800;margin:0 0 9px;letter-spacing:-.6px}
-    .auth-form-sub{text-align:center;color:#91a6c8;font-size:15px;line-height:1.65;margin:0 auto 28px;max-width:560px}
-    div[data-testid="stTextInput"]{margin-bottom:18px}
-    div[data-testid="stTextInput"] label{color:#e4ecfb!important;font-size:15px!important;font-weight:650!important;letter-spacing:.1px!important;margin-bottom:8px!important}
-    div[data-testid="stTextInput"] input{background:rgba(20,31,55,.88)!important;border:1px solid rgba(111,151,201,.34)!important;border-radius:12px!important;color:#f4f8ff!important;height:56px!important;font-size:16px!important;padding:0 16px!important}
-    div[data-testid="stTextInput"] input:focus{border-color:#27d4ff!important;box-shadow:0 0 0 1px rgba(39,212,255,.32),0 0 24px rgba(39,212,255,.10)!important}
-    div[data-testid="stTextInput"] input::placeholder{color:#7589aa!important}
-    .auth-form-area button[kind="primary"]{min-height:54px!important;border-radius:12px!important;font-size:15px!important;font-weight:750!important;letter-spacing:.35px!important;background:linear-gradient(100deg,#13bdf1,#276df4 50%,#7637ee)!important;border:0!important;color:#fff!important;box-shadow:0 12px 30px rgba(41,111,239,.20)!important}
-    .auth-form-area button[kind="primary"]:hover{filter:brightness(1.08);transform:translateY(-1px)}
-    .auth-secondary{text-align:center;margin:20px 0 12px;color:#8499bb;font-size:14px;line-height:1.6}.auth-secondary span{color:#37cfff;font-weight:700}
-    .auth-note{margin-top:22px;padding:15px 18px;border-radius:12px;background:rgba(35,111,221,.075);border:1px solid rgba(74,164,255,.20);color:#91a6c7;font-size:13px;line-height:1.6;text-align:center}.auth-note strong{color:#dce8fb}
-    .auth-email{display:block;color:#3bd8ff;font-weight:800;font-size:16px;margin:3px 0}
-    .auth-code input{text-align:center!important;letter-spacing:10px!important;font-size:25px!important;font-family:Orbitron,sans-serif!important;font-weight:700!important}
-    .auth-help{text-align:center;color:#7086aa;font-size:12px;line-height:1.7;margin-top:18px}.auth-help strong{color:#dce8fb}
-    .auth-security-row{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;margin:28px auto 0;padding-top:20px;border-top:1px solid rgba(111,153,216,.13);color:#748caf;font-size:11px;letter-spacing:1.3px;text-transform:uppercase}
-    .auth-security-row span:before{content:"✓";color:#3de5b2;margin-right:7px;font-weight:900}
-    .auth-footer{text-align:center;color:#526a91;font-size:10px;letter-spacing:1.4px;margin-top:22px;text-transform:uppercase}
-    @media(max-width:760px){.auth-wrap{margin:1vh auto 0;padding:0 12px 30px}.auth-card{padding:30px 22px 25px;border-radius:18px}.auth-brand{font-size:27px;letter-spacing:3px}.auth-command-label{font-size:9px;letter-spacing:2px}.auth-form-title{font-size:26px}.auth-form-sub{font-size:13px}.auth-step-line{width:24px;margin:0 7px}.auth-step-item{gap:5px;font-size:9px}.auth-step-dot{width:29px;height:29px;font-size:11px}.auth-security-row{gap:15px;font-size:9px}}
+    /* =========================================================
+       NEXORA SECURE — FINAL AUTH UI
+       ========================================================= */
+    [data-testid="stHeader"]{background:transparent!important;height:0!important}
+    [data-testid="stToolbar"]{display:none!important}
+    #MainMenu{display:none!important}
+    footer{display:none!important}
+    [data-testid="stAppViewContainer"]{background:
+        radial-gradient(circle at 50% 0%,rgba(42,78,180,.16),transparent 34%),
+        radial-gradient(circle at 80% 30%,rgba(120,42,210,.10),transparent 30%),
+        #070b16!important;
+    }
+    [data-testid="stAppViewContainer"] > .main .block-container{
+        max-width:1080px!important;
+        padding:1.25rem 1.25rem 2.5rem!important;
+        margin:0 auto!important;
+    }
+    .auth-shell{max-width:860px;margin:0 auto;text-align:center;padding:6px 0 0}
+    .auth-brand{font-family:Orbitron,sans-serif;font-size:38px;font-weight:900;letter-spacing:5px;color:#f7f9ff;line-height:1.1}
+    .auth-brand span{color:#43d7ff}
+    .auth-kicker{margin-top:9px;color:#7895c4;font-size:9px;letter-spacing:4px;text-transform:uppercase}
+    .auth-intro{margin:15px auto 0;color:#b9c9e5;font-size:17px;line-height:1.5;font-weight:500}
+
+    .auth-progress{max-width:700px;margin:25px auto 22px;display:grid;grid-template-columns:1fr 1fr 1fr;position:relative}
+    .auth-progress:before{content:"";position:absolute;top:18px;left:16%;right:16%;height:1px;background:rgba(130,158,210,.28);z-index:0}
+    .auth-progress-item{position:relative;z-index:1;text-align:center;color:#65799d;font-size:10px;font-weight:700}
+    .auth-progress-num{width:36px;height:36px;border-radius:50%;margin:0 auto 7px;border:1px solid rgba(112,142,194,.45);background:#0b1324;display:flex;align-items:center;justify-content:center;color:#92a7cb;font-size:13px}
+    .auth-progress-item.active .auth-progress-num{border-color:#3f96ff;background:linear-gradient(135deg,#197cff,#743cff);color:white;box-shadow:0 0 24px rgba(66,104,255,.32)}
+    .auth-progress-item.active{color:#edf6ff}
+    .auth-progress-label{font-size:11px}
+    .auth-progress-sub{margin-top:3px;font-size:9px;font-weight:400;color:#6f84a8}
+
+    .auth-card{max-width:700px;margin:0 auto;border:1px solid rgba(78,139,229,.30);border-radius:24px;background:linear-gradient(145deg,rgba(12,23,45,.97),rgba(7,14,29,.98));box-shadow:0 28px 80px rgba(0,0,0,.48),0 0 55px rgba(41,91,190,.09);overflow:hidden}
+    .auth-card-head{padding:27px 46px 20px;border:0!important;background:transparent!important;}
+    .auth-icon{width:58px;height:58px;border-radius:17px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(35,113,255,.18),rgba(150,55,255,.20));border:1px solid rgba(93,133,255,.78);color:#aebcff;font-size:27px;box-shadow:0 0 26px rgba(76,86,255,.18)}
+    .auth-form-title{font-family:Orbitron,sans-serif;font-size:25px;font-weight:800;color:#f3f7ff;margin:0 0 7px}
+    .auth-form-title .accent{color:#4bd7ff}
+    .auth-form-sub{color:#8da4c9;font-size:12px;line-height:1.6;text-align:center;margin:0 auto;max-width:520px}
+
+    div[data-testid="stForm"]{max-width:none!important;margin:0!important;padding:0 46px 28px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+    div[data-testid="stForm"] label{color:#d9e6fa!important;font-size:11px!important;font-weight:700!important}
+    div[data-testid="stForm"] input{height:50px!important;background:rgba(4,12,27,.88)!important;border:1px solid rgba(100,137,195,.30)!important;border-radius:11px!important;color:#f5f8ff!important;font-size:14px!important}
+    div[data-testid="stForm"] input:focus{border-color:#42d3ff!important;box-shadow:0 0 0 1px rgba(66,211,255,.14),0 0 20px rgba(45,112,255,.09)!important}
+    div[data-testid="stForm"] input::placeholder{color:#5f7598!important}
+    div[data-testid="stForm"] button[kind="primaryFormSubmit"],div[data-testid="stForm"] button[type="submit"]{min-height:50px!important;border:0!important;border-radius:11px!important;background:linear-gradient(90deg,#167cff,#633dff,#a737ee)!important;color:#fff!important;font-size:13px!important;font-weight:850!important;letter-spacing:.4px!important;box-shadow:0 12px 30px rgba(75,65,255,.20)!important}
+    div[data-testid="stForm"] button:hover{filter:brightness(1.08)}
+    .auth-note{max-width:700px;margin:0 auto 22px;padding:13px 18px;border:1px solid rgba(82,145,235,.18);border-radius:11px;background:rgba(25,70,140,.09);color:#91a9cf;font-size:10px;line-height:1.65;text-align:center}
+    .auth-email{color:#4dd8ff;font-weight:800;word-break:break-all}
+    .auth-help{max-width:610px;margin:13px auto 0;text-align:center;color:#647b9f;font-size:9px;line-height:1.7}
+    .auth-actions{max-width:700px;margin:0 auto;padding:0 46px}
+    .auth-actions .stButton>button{height:44px!important;border-radius:10px!important;background:rgba(255,255,255,.025)!important;border:1px solid rgba(82,145,235,.32)!important;color:#b7c8e4!important;font-size:10px!important;font-weight:800!important;letter-spacing:1px!important}
+    .auth-actions .stButton>button:hover{border-color:rgba(68,210,255,.7)!important;color:#eaf7ff!important}
+    .auth-features{max-width:700px;margin:18px auto 0;border-top:1px solid rgba(100,140,200,.10);display:grid;grid-template-columns:1fr 1fr 1fr;color:#7890b5}
+    .auth-feature{padding:14px 10px 7px;border-right:1px solid rgba(100,140,200,.10)}
+    .auth-feature:last-child{border-right:0}
+    .auth-feature b{display:block;color:#82b5ff;font-size:9px;letter-spacing:1.2px;margin-bottom:4px}
+    .auth-feature span{font-size:9px}
+    .auth-footer{max-width:700px;margin:12px auto 0;text-align:center;color:#526987;font-size:8px;letter-spacing:1.7px}
+    .auth-code input{text-align:center!important;letter-spacing:9px!important;font-size:23px!important;font-family:Orbitron,sans-serif!important}
+    @media(max-width:760px){
+        [data-testid="stAppViewContainer"] > .main .block-container{padding:1rem .65rem 2rem!important}
+        .auth-brand{font-size:28px;letter-spacing:3px}.auth-intro{font-size:14px}
+        .auth-progress{margin-top:20px}.auth-progress-sub{display:none}
+        .auth-card-head{padding:23px 22px 17px}.auth-form-title{font-size:21px}
+        div[data-testid="stForm"]{padding:0 22px 23px!important}.auth-actions{padding:0 22px}
+        .auth-features{grid-template-columns:1fr}.auth-feature{border-right:0;border-bottom:1px solid rgba(100,140,200,.10);padding:9px}.auth-feature:last-child{border-bottom:0}
+    }
     </style>
     """, unsafe_allow_html=True)
-
-
 
 
 def render_auth_gate():
@@ -316,38 +347,42 @@ def render_auth_gate():
         mode = "login"
         st.session_state.auth_mode = mode
 
-    st.markdown('<div class="auth-wrap">', unsafe_allow_html=True)
-    st.markdown("""
-        <div class="auth-page-header">
-            <div class="auth-n-mark">N</div>
-            <div class="auth-brand">NEXORA<span>•</span>SECURE</div>
-            <div class="auth-command-label">COMMAND CENTER ACCESS</div>
-        </div>
-        <div class="auth-card">
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="auth-form-area">', unsafe_allow_html=True)
+    step_one = "active" if mode != "otp" else ""
+    step_two = "active" if mode == "otp" else ""
+
+    st.markdown(
+        '<div class="auth-shell">'
+        '<div class="auth-brand">NEXORA<span>•</span>SECURE</div>'
+        '<div class="auth-kicker">PREDICTIVE RUNTIME ORCHESTRATION · IDENTITY GATE</div>'
+        '<div class="auth-intro">Secure access to the NEXORA command center.</div>'
+        f'<div class="auth-progress">'
+        f'<div class="auth-progress-item {step_one}"><div class="auth-progress-num">1</div><div class="auth-progress-label">Login</div><div class="auth-progress-sub">Enter credentials</div></div>'
+        f'<div class="auth-progress-item {step_two}"><div class="auth-progress-num">2</div><div class="auth-progress-label">Email OTP</div><div class="auth-progress-sub">Verify your identity</div></div>'
+        f'<div class="auth-progress-item"><div class="auth-progress-num">3</div><div class="auth-progress-label">Access</div><div class="auth-progress-sub">Enter workspace</div></div>'
+        '</div>'
+        '</div>', unsafe_allow_html=True
+    )
 
     if mode == "login":
-        st.markdown("""
-            <div class="auth-steps">
-                <div class="auth-step-item active"><div class="auth-step-dot">1</div><span>IDENTITY</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item"><div class="auth-step-dot">2</div><span>EMAIL OTP</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item"><div class="auth-step-dot">3</div><span>WORKSPACE</span></div>
-            </div>
-            <div class="auth-form-title">Welcome back</div>
-            <div class="auth-form-sub">Sign in to access your NEXORA Command Center. A one-time email code will be required after your password is verified.</div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="auth-card-head">'
+            '<div class="auth-icon">⌑</div>'
+            '<div class="auth-form-title">Welcome to <span class="accent">NEXORA</span></div>'
+            '<div class="auth-form-sub">Sign in to continue to your secure workspace.</div>'
+            '</div>', unsafe_allow_html=True
+        )
         with st.form("nexora_login_form"):
-            email = st.text_input("Registered email", placeholder="you@example.com")
+            email = st.text_input("Email address", placeholder="you@example.com")
             password = st.text_input("Password", type="password", placeholder="Enter your password")
-            submitted = st.form_submit_button("CONTINUE  →", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("SIGN IN   →", use_container_width=True, type="primary")
         if submitted:
             email = email.strip().lower()
-            conn = auth_db(); user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone(); conn.close()
+            conn = auth_db()
+            user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+            conn.close()
             if user is None or not verify_password(password, user["password_hash"]):
-                if user is not None: audit("PASSWORD_FAILED", user["id"], email)
+                if user is not None:
+                    audit("PASSWORD_FAILED", user["id"], email)
                 st.error("Invalid email or password.")
             else:
                 try:
@@ -357,94 +392,130 @@ def render_auth_gate():
                     st.session_state.otp_sent_at = auth_now()
                     st.session_state.auth_mode = "otp"
                     st.rerun()
-                except Exception as exc: st.error(str(exc))
-        st.markdown('<div class="auth-secondary">Don\'t have an account? <span>Create account</span></div>', unsafe_allow_html=True)
-        if st.button("CREATE ACCOUNT", use_container_width=True):
-            st.session_state.auth_mode = "register"; st.rerun()
-        st.markdown('<div class="auth-note"><strong>Secure access</strong><br>Your password is verified locally. Access is granted only after the OTP sent to your registered email is verified.</div>', unsafe_allow_html=True)
+                except Exception as exc:
+                    st.error(str(exc))
+        st.markdown('<div class="auth-help">Protected by two-factor authentication. Your password is verified first, then a one-time code is delivered to your registered email.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="auth-actions">', unsafe_allow_html=True)
+        if st.button("CREATE NEW ACCOUNT", use_container_width=True):
+            st.session_state.auth_mode = "register"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     elif mode == "register":
-        st.markdown("""
-            <div class="auth-steps">
-                <div class="auth-step-item active"><div class="auth-step-dot">1</div><span>IDENTITY</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item"><div class="auth-step-dot">2</div><span>EMAIL OTP</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item"><div class="auth-step-dot">3</div><span>WORKSPACE</span></div>
-            </div>
-            <div class="auth-form-title">Create your account</div>
-            <div class="auth-form-sub">Register your NEXORA identity. A one-time code will be sent to your email before access is granted.</div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="auth-card-head">'
+            '<div class="auth-icon">＋</div>'
+            '<div class="auth-form-title">Create your <span class="accent">NEXORA</span> identity</div>'
+            '<div class="auth-form-sub">Register an email and password to access the protected command center.</div>'
+            '</div>', unsafe_allow_html=True
+        )
         with st.form("nexora_register_form"):
             email = st.text_input("Email address", placeholder="you@gmail.com")
             password = st.text_input("Create password", type="password", placeholder="Minimum 8 characters")
             confirm = st.text_input("Confirm password", type="password", placeholder="Re-enter your password")
-            submitted = st.form_submit_button("CREATE ACCOUNT  →", use_container_width=True, type="primary")
+            submitted = st.form_submit_button("CREATE ACCOUNT   →", use_container_width=True, type="primary")
         if submitted:
             email = email.strip().lower()
-            if "@" not in email or "." not in email.split("@")[-1]: st.error("Enter a valid email address.")
-            elif len(password) < 8: st.error("Password must be at least 8 characters.")
-            elif password != confirm: st.error("Passwords do not match.")
+            if "@" not in email or "." not in email.split("@")[-1]:
+                st.error("Enter a valid email address.")
+            elif len(password) < 8:
+                st.error("Password must be at least 8 characters.")
+            elif password != confirm:
+                st.error("Passwords do not match.")
             else:
-                conn = auth_db(); existing = conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
+                conn = auth_db()
+                existing = conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
                 if existing:
-                    conn.close(); st.error("An account with that email already exists. Sign in instead.")
+                    conn.close()
+                    st.error("An account with that email already exists. Sign in instead.")
                 else:
                     conn.execute("INSERT INTO users(email,password_hash,created_at) VALUES(?,?,?)", (email, hash_password(password), datetime.now().isoformat(timespec="seconds")))
-                    conn.commit(); user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]; conn.close()
+                    conn.commit()
+                    user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+                    conn.close()
                     try:
-                        create_otp(user_id, email); audit("ACCOUNT_CREATED", user_id, email)
-                        st.session_state.pending_user_id = user_id; st.session_state.pending_email = email; st.session_state.otp_sent_at = auth_now(); st.session_state.auth_mode = "otp"; st.rerun()
+                        create_otp(user_id, email)
+                        audit("ACCOUNT_CREATED", user_id, email)
+                        st.session_state.pending_user_id = user_id
+                        st.session_state.pending_email = email
+                        st.session_state.otp_sent_at = auth_now()
+                        st.session_state.auth_mode = "otp"
+                        st.rerun()
                     except Exception as exc:
-                        conn = auth_db(); conn.execute("DELETE FROM users WHERE id=?", (user_id,)); conn.commit(); conn.close(); st.error(str(exc))
-        st.markdown('<div class="auth-secondary">Already registered? <span>Sign in</span></div>', unsafe_allow_html=True)
-        if st.button("BACK TO SIGN IN", use_container_width=True): st.session_state.auth_mode = "login"; st.rerun()
+                        conn = auth_db()
+                        conn.execute("DELETE FROM users WHERE id=?", (user_id,))
+                        conn.commit()
+                        conn.close()
+                        st.error(str(exc))
+        st.markdown('<div class="auth-actions">', unsafe_allow_html=True)
+        if st.button("← BACK TO SIGN IN", use_container_width=True):
+            st.session_state.auth_mode = "login"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
     else:
         email = st.session_state.get("pending_email", "")
         user_id = st.session_state.get("pending_user_id")
-        st.markdown("""
-            <div class="auth-steps">
-                <div class="auth-step-item"><div class="auth-step-dot">1</div><span>IDENTITY</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item active"><div class="auth-step-dot">2</div><span>EMAIL OTP</span></div>
-                <div class="auth-step-line"></div>
-                <div class="auth-step-item"><div class="auth-step-dot">3</div><span>WORKSPACE</span></div>
-            </div>
-            <div class="auth-form-title">Verify your identity</div>
-            <div class="auth-form-sub">Enter the six-digit verification code sent to your registered email address.</div>
-        """, unsafe_allow_html=True)
-        st.markdown(f'<div class="auth-note"><strong>Verification code sent to</strong><span class="auth-email">{esc(email)}</span><span>Expires in 5 minutes · One-time use</span></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="auth-card-head">'
+            '<div class="auth-icon">✦</div>'
+            '<div class="auth-form-title">Verify your <span class="accent">email</span></div>'
+            '<div class="auth-form-sub">Enter the six-digit code sent to your registered address.</div>'
+            '</div>', unsafe_allow_html=True
+        )
+        st.markdown(f'<div class="auth-note">CODE SENT TO<br><span class="auth-email">{esc(email)}</span><br><span style="opacity:.8">The code expires in 5 minutes and can be used once.</span></div>', unsafe_allow_html=True)
         st.markdown('<div class="auth-code">', unsafe_allow_html=True)
         with st.form("nexora_otp_form"):
-            code = st.text_input("6-digit verification code", max_chars=6, placeholder="123456")
-            submitted = st.form_submit_button("VERIFY OTP  →", use_container_width=True, type="primary")
+            code = st.text_input("Verification code", max_chars=6, placeholder="• • • • • •")
+            submitted = st.form_submit_button("VERIFY & OPEN NEXORA   →", use_container_width=True, type="primary")
         st.markdown('</div>', unsafe_allow_html=True)
         if submitted:
-            if not user_id: st.session_state.auth_mode = "login"; st.rerun()
+            if not user_id:
+                st.session_state.auth_mode = "login"
+                st.rerun()
             ok, message = verify_otp_code(user_id, code.strip())
             if ok:
-                st.session_state.nexora_authenticated = True; st.session_state.nexora_user_id = user_id; st.session_state.nexora_email = email; st.session_state.auth_mode = "login"; st.rerun()
-            else: st.error(message)
-        sent_at = st.session_state.get("otp_sent_at", 0); remaining = max(0, OTP_RESEND_COOLDOWN - (auth_now() - sent_at))
+                st.session_state.nexora_authenticated = True
+                st.session_state.nexora_user_id = user_id
+                st.session_state.nexora_email = email
+                st.session_state.auth_mode = "login"
+                st.rerun()
+            else:
+                st.error(message)
+
+        sent_at = st.session_state.get("otp_sent_at", 0)
+        remaining = max(0, OTP_RESEND_COOLDOWN - (auth_now() - sent_at))
         if remaining == 0:
             if st.button("RESEND VERIFICATION CODE", use_container_width=True):
-                conn = auth_db(); user = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone(); conn.close()
-                try: create_otp(user_id, email); st.session_state.otp_sent_at = auth_now(); st.rerun()
-                except Exception as exc: st.error(str(exc))
+                conn = auth_db()
+                user = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+                conn.close()
+                try:
+                    create_otp(user_id, email)
+                    st.session_state.otp_sent_at = auth_now()
+                    st.rerun()
+                except Exception as exc:
+                    st.error(str(exc))
         else:
-            st.markdown(f'<div class="auth-help">Resend available in <strong>{remaining}s</strong></div>', unsafe_allow_html=True)
-        if st.button("BACK TO LOGIN", use_container_width=True):
-            st.session_state.auth_mode = "login"; st.session_state.pop("pending_user_id", None); st.session_state.pop("pending_email", None); st.session_state.pop("otp_sent_at", None); st.rerun()
+            st.markdown(f'<div class="auth-help">Resend available in {remaining}s</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-security-row"><span>SECURE ACCESS</span><span>EMAIL OTP</span><span>PROTECTED SESSION</span></div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-footer">NEXORA RUNTIME PLATFORM · AUTHENTICATION GATE</div>', unsafe_allow_html=True)
-    st.markdown('</div></div>', unsafe_allow_html=True)
+        if st.button("← CANCEL & RETURN TO LOGIN", use_container_width=True):
+            st.session_state.auth_mode = "login"
+            st.session_state.pop("pending_user_id", None)
+            st.session_state.pop("pending_email", None)
+            st.session_state.pop("otp_sent_at", None)
+            st.rerun()
+
+    st.markdown(
+        '<div class="auth-features">'
+        '<div class="auth-feature"><b>SECURE</b><span>Two-factor authentication</span></div>'
+        '<div class="auth-feature"><b>RELIABLE</b><span>Protected runtime access</span></div>'
+        '<div class="auth-feature"><b>BUILT FOR AI</b><span>Orchestrate with confidence</span></div>'
+        '</div>'
+        '<div class="auth-footer">NEXORA SECURITY LAYER · EMAIL OTP · SESSION PROTECTED</div>',
+        unsafe_allow_html=True
+    )
     return False
-
-
-
 
 def render_auth_status():
     email = st.session_state.get("nexora_email", "")
@@ -1846,6 +1917,19 @@ def run_live(task):
         monitor,interceptor,ai,tools
     ) = build_system()
 
+    # Measure real Ollama inference inside NEXORA separately from runtime overhead.
+    _original_generate = ai.generate
+    _ai_timing = {"calls": 0, "seconds": 0.0}
+
+    def _timed_generate(prompt, temperature=0.1):
+        _started = time.perf_counter()
+        _result = _original_generate(prompt, temperature=temperature)
+        _ai_timing["seconds"] += time.perf_counter() - _started
+        _ai_timing["calls"] += 1
+        return _result
+
+    ai.generate = _timed_generate
+
     agent = LiveAgent(
         agent_id=100,
         name="Live Research AI",
@@ -1898,6 +1982,9 @@ def run_live(task):
 
     return {
         "elapsed":elapsed,
+        "ollama_time":_ai_timing["seconds"],
+        "ollama_calls":_ai_timing["calls"],
+        "nexora_overhead":max(0.0, elapsed - _ai_timing["seconds"]),
         "events":interceptor.get_events(),
         # Show current-run telemetry in the dashboard. The underlying
         # RuntimeHistory remains persistent and is still used by the
@@ -2741,335 +2828,385 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+st.markdown("""
+<style>
+/* ===== REAL AI vs NEXORA BENCHMARK ===== */
+.bench-hero{margin:10px 0 22px;padding:28px 30px;border:1px solid rgba(105,126,255,.30);border-radius:22px;background:linear-gradient(135deg,rgba(16,24,60,.96),rgba(35,17,65,.94));box-shadow:0 20px 60px rgba(0,0,0,.22)}
+.bench-hero-kicker{color:#70d8ff;font-size:11px;font-weight:900;letter-spacing:1.8px}
+.bench-hero-title{margin-top:9px;color:#f6f8ff;font-family:Orbitron,sans-serif;font-size:28px;font-weight:900;line-height:1.2}
+.bench-hero-sub{max-width:920px;margin-top:12px;color:#9eb1d0;font-size:14px;line-height:1.7}
+.bench-note{margin:12px 0 20px;padding:14px 17px;border-left:3px solid #70d8ff;border-radius:10px;background:rgba(66,91,180,.09);color:#aebddb;font-size:13px;line-height:1.6}
+.bench-understood{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 22px}
+.bench-understood>div{padding:15px 16px;border:1px solid rgba(105,126,255,.20);border-radius:13px;background:rgba(8,14,36,.72)}
+.bench-understood span{display:block;color:#7085aa;font-size:9px;font-weight:900;letter-spacing:1.2px}
+.bench-understood b{display:block;margin-top:7px;color:#edf3ff;font-size:14px;overflow-wrap:anywhere}
+.bench-metrics-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:12px 0 18px}
+.bench-metric{min-height:145px;padding:20px;border:1px solid rgba(105,126,255,.22);border-radius:17px;background:linear-gradient(145deg,rgba(11,18,45,.94),rgba(7,10,28,.94));box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.bench-metric.reactive-card{border-color:rgba(255,183,77,.28)}
+.bench-metric.nexora-card{border-color:rgba(75,225,177,.32)}
+.bench-metric.delta-card{border-color:rgba(112,216,255,.28)}
+.bench-metric.wait-card{border-color:rgba(174,119,255,.28)}
+.bench-label{color:#7f94b9;font-size:10px;font-weight:900;letter-spacing:1.2px}
+.bench-value{margin-top:10px;color:#f5f8ff;font-family:Orbitron,sans-serif;font-size:30px;font-weight:900;line-height:1.1;overflow-wrap:anywhere}
+.bench-sub{margin-top:9px;color:#8094b8;font-size:11px;line-height:1.45}
+.bench-verdict{margin:18px 0 24px;padding:25px;text-align:center;border:1px solid rgba(112,216,255,.24);border-radius:19px;background:linear-gradient(135deg,rgba(25,55,100,.20),rgba(79,32,130,.16))}
+.bench-verdict-label{color:#91a4c5;font-size:10px;font-weight:900;letter-spacing:1.6px}
+.bench-verdict-number{margin-top:7px;color:#70e0ff;font-family:Orbitron,sans-serif;font-size:40px;font-weight:900}
+.bench-verdict-text{max-width:850px;margin:9px auto 0;color:#aebddb;font-size:13px;line-height:1.6}
+.bench-side{height:100%;padding:20px;border-radius:16px;border:1px solid rgba(105,126,255,.20);background:rgba(8,13,35,.80)}
+.bench-side.reactive{border-color:rgba(255,183,77,.24)}
+.bench-side.nexora{border-color:rgba(66,239,180,.24)}
+.bench-side-kicker{color:#7186aa;font-size:9px;font-weight:900;letter-spacing:1.5px}
+.bench-side-title{margin-top:7px;color:#f4f7ff;font-family:Orbitron,sans-serif;font-size:24px;font-weight:900}
+.bench-side-flow{margin-top:9px;color:#d4def2;font-size:13px;font-weight:700;line-height:1.5}
+.bench-side-detail{margin-top:9px;color:#8195b9;font-size:11px;line-height:1.55}
+.bench-empty{display:flex;gap:15px;align-items:center;margin-top:16px;padding:22px;border:1px dashed rgba(112,216,255,.28);border-radius:16px;background:rgba(7,14,34,.58)}
+.bench-empty-icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:rgba(112,216,255,.10);color:#70d8ff;font-size:21px;font-weight:900;flex:none}
+.bench-empty b{display:block;color:#edf3ff;font-size:13px;letter-spacing:.5px}
+.bench-empty span{display:block;margin-top:5px;color:#7f94b8;font-size:11px;line-height:1.5}
+@media(max-width:1150px){.bench-metrics-grid{grid-template-columns:repeat(3,1fr)}.bench-understood{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.bench-metrics-grid{grid-template-columns:repeat(2,1fr)}.bench-understood{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.bench-metrics-grid,.bench-understood{grid-template-columns:1fr}.bench-hero{padding:20px}.bench-hero-title{font-size:22px}.bench-value{font-size:25px}}
+</style>
+""", unsafe_allow_html=True)
+
+# REAL AI vs NEXORA BENCHMARK
 # ============================================================
-# NEXORA VS REACTIVE RUNTIME BENCHMARK
-# ============================================================
 
-def run_runtime_benchmark(trials=5):
-    """Run a deterministic A/B runtime benchmark.
 
-    IMPORTANT:
-    Both sides execute the SAME workload. We do not change the task result,
-    service durations, resource capacity, or agent work. The only difference
-    is when DATABASE is claimed:
+def _run_reactive_ai(task):
+    """Measure the same local Ollama model with no NEXORA runtime.
 
-    REACTIVE:
-        The competing Data Agent claims DATABASE first. Research discovers
-        the dependency only when it reaches the DATABASE step and therefore
-        waits for the resource to be released.
-
-    NEXORA:
-        The runtime predicts Research's future DATABASE dependency and creates
-        an explicit reservation before either workflow enters the resource
-        phase. The reservation prevents Data Agent from taking that slot, so
-        Research can acquire DATABASE without resource wait.
-
-    The benchmark measures orchestration/resource waiting latency. It does not
-    claim that NEXORA makes the underlying AI model generate tokens faster.
+    This is deliberately a real wall-clock measurement: no fixed service
+    durations, no fabricated contention delay and no hard-coded result.
     """
+    ai = LocalAI(model="llama3.2:3b")
 
-    trials = max(1, int(trials))
+    prompt = f"""
+Answer the user's task directly.
+Do not use NEXORA, reservations, scheduling or orchestration.
+Return a concise useful answer.
 
-    def reactive_trial():
-        start = time.perf_counter()
-        db_lock = threading.Lock()
-        data_has_database = threading.Event()
-        research_can_request = threading.Event()
-        results = {
-            "research_wait": 0.0,
-            "research_done": 0.0,
-            "reservation": "NONE",
-            "contention": "DATABASE",
-            "trace": []
-        }
+USER TASK:
+{task}
+"""
 
-        def data_agent():
-            # Reactive baseline: Data reaches DATABASE first.
-            with db_lock:
-                results["trace"].append("DATA → DATABASE allocated")
-                data_has_database.set()
-                time.sleep(0.35)
-                results["trace"].append("DATA → DATABASE released")
-
-        def research_agent():
-            # Wait until the competing workflow demonstrably owns DATABASE.
-            data_has_database.wait()
-            results["trace"].append("RESEARCH → DATABASE requested")
-            request_time = time.perf_counter()
-            with db_lock:
-                results["research_wait"] = time.perf_counter() - request_time
-                results["trace"].append("RESEARCH → DATABASE allocated")
-                time.sleep(0.12)
-                results["trace"].append("RESEARCH → DATABASE released")
-            results["research_done"] = time.perf_counter() - start
-            research_can_request.set()
-
-        data = threading.Thread(target=data_agent, name="reactive-data")
-        research = threading.Thread(target=research_agent, name="reactive-research")
-
-        data.start()
-        research.start()
-        data.join()
-        research.join()
-
-        elapsed = time.perf_counter() - start
-        results["elapsed"] = elapsed
-        results["critical_elapsed"] = results["research_done"]
-        return results
-
-    def nexora_trial():
-        start = time.perf_counter()
-        db_lock = threading.Lock()
-        reservation_lock = threading.Lock()
-        results = {
-            "research_wait": 0.0,
-            "research_done": 0.0,
-            "reservation": "DATABASE reserved for Research Agent",
-            "contention": "DATABASE",
-            "trace": []
-        }
-
-        # NEXORA prediction/reservation happens BEFORE either workflow can
-        # enter the shared-resource phase.
-        reservation_lock.acquire()
-        reservation_created = time.perf_counter()
-        results["trace"].append(
-            "NEXORA → predicted DATABASE dependency"
-        )
-        results["trace"].append(
-            "NEXORA → DATABASE reserved for Research"
-        )
-
-        def data_agent():
-            # The competing workflow can run, but it cannot consume the
-            # reserved DATABASE capacity.
-            results["trace"].append("DATA → DATABASE request blocked by reservation")
-            while reservation_lock.locked():
-                time.sleep(0.005)
-            with db_lock:
-                results["trace"].append("DATA → DATABASE allocated")
-                time.sleep(0.35)
-                results["trace"].append("DATA → DATABASE released")
-
-        def research_agent():
-            # Research owns the reservation, so it can acquire the physical
-            # resource immediately without waiting behind Data.
-            results["trace"].append("RESEARCH → DATABASE requested")
-            request_time = time.perf_counter()
-            with db_lock:
-                results["research_wait"] = time.perf_counter() - request_time
-                results["trace"].append("RESEARCH → DATABASE allocated via reservation")
-                time.sleep(0.12)
-                results["trace"].append("RESEARCH → DATABASE released")
-
-            if reservation_lock.locked():
-                reservation_lock.release()
-                results["trace"].append("NEXORA → reservation released")
-
-            results["research_done"] = time.perf_counter() - start
-
-        # Start Research first because NEXORA has already reserved its future
-        # dependency. Data starts concurrently but cannot steal the slot.
-        research = threading.Thread(target=research_agent, name="nexora-research")
-        data = threading.Thread(target=data_agent, name="nexora-data")
-        research.start()
-        time.sleep(0.01)
-        data.start()
-        research.join()
-        data.join()
-
-        elapsed = time.perf_counter() - start
-        results["elapsed"] = elapsed
-        results["critical_elapsed"] = results["research_done"]
-        results["prediction_to_reservation"] = time.perf_counter() - reservation_created
-        return results
-
-    reactive = [reactive_trial() for _ in range(trials)]
-    nexora = [nexora_trial() for _ in range(trials)]
-
-    def avg(rows, key):
-        return sum(row[key] for row in rows) / len(rows)
-
-    reactive_total = avg(reactive, "critical_elapsed")
-    nexora_total = avg(nexora, "critical_elapsed")
-    reactive_wait = avg(reactive, "research_wait")
-    nexora_wait = avg(nexora, "research_wait")
-
-    reduction = 0.0
-    if reactive_total > 0:
-        reduction = ((reactive_total - nexora_total) / reactive_total) * 100.0
+    started = time.perf_counter()
+    response = ai.generate(prompt, temperature=0.1)
+    elapsed = time.perf_counter() - started
 
     return {
+        "elapsed": elapsed,
+        "response": response,
+        "model": ai.model,
+    }
+
+
+def _benchmark_prediction_summary(result):
+    """Extract real NEXORA prediction/reservation telemetry from the run."""
+    events = result.get("events", []) if isinstance(result, dict) else []
+
+    predictions = [
+        event for event in events
+        if event.get("event") == "PREDICTION"
+    ]
+
+    reservations = [
+        event for event in events
+        if event.get("event") in {
+            "PLAN_RESERVATION",
+            "RESERVATION_REQUEST",
+            "RESERVATION_PROMOTED"
+        }
+    ]
+
+    waits = 0.0
+    history = result.get("history", []) if isinstance(result, dict) else []
+    for event in history:
+        try:
+            waits += float(event.get("waiting_time", 0) or 0)
+        except (TypeError, ValueError):
+            pass
+
+    return {
+        "predictions": len(predictions),
+        "reservations": len(reservations),
+        "wait": waits,
+    }
+
+
+def run_ai_vs_nexora_benchmark(task, trials=1):
+    """Measure the real local AI and the real NEXORA runtime on the same task.
+
+    Reactive side:
+        Same Ollama model answers the task directly with no NEXORA runtime.
+
+    NEXORA side:
+        The same Ollama model is placed inside the actual NEXORA runtime.
+        NEXORA performs its real planning, prediction, reservation,
+        scheduling and tool execution.
+
+    The timings are wall-clock measurements from perf_counter(). They are
+    not synthetic service-duration estimates.
+    """
+    if not task or not task.strip():
+        raise ValueError("Enter a problem statement before running the benchmark.")
+
+    rows = []
+
+    for trial in range(1, trials + 1):
+        # Measure the baseline first.
+        reactive = _run_reactive_ai(task)
+
+        # Measure the actual NEXORA application path.
+        nexora_started = time.perf_counter()
+        nexora_result = run_live(task)
+        nexora_wall = time.perf_counter() - nexora_started
+
+        telemetry = _benchmark_prediction_summary(nexora_result)
+
+        rows.append({
+            "trial": trial,
+            "reactive_total": reactive["elapsed"],
+            "nexora_total": nexora_wall,
+            "nexora_internal": float(nexora_result.get("elapsed", nexora_wall)),
+            "predictions": telemetry["predictions"],
+            "reservations": telemetry["reservations"],
+            "nexora_wait": telemetry["wait"],
+            "reactive_response": reactive["response"],
+            "nexora_result": nexora_result,
+        })
+
+    def avg(key):
+        return sum(float(row[key]) for row in rows) / len(rows)
+
+    reactive_total = avg("reactive_total")
+    nexora_total = avg("nexora_total")
+    nexora_internal = avg("nexora_internal")
+
+    difference = nexora_total - reactive_total
+    percentage = (
+        (difference / reactive_total) * 100.0
+        if reactive_total > 0 else 0.0
+    )
+
+    return {
+        "mode": "REAL_LOCAL_AI_VS_REAL_NEXORA",
+        "model": rows[0]["nexora_result"].get("model", "llama3.2:3b"),
+        "task": task,
         "trials": trials,
-        "reactive": reactive,
-        "nexora": nexora,
+        "rows": rows,
         "reactive_total": reactive_total,
         "nexora_total": nexora_total,
-        "reactive_wait": reactive_wait,
-        "nexora_wait": nexora_wait,
-        "latency_reduction": reduction,
-        "workload": {
-            "resource": "DATABASE",
-            "capacity": 1,
-            "critical_agent": "Research Agent",
-            "competing_agent": "Data Agent",
-            "critical_path": "PLAN → DATABASE → REPORT",
-            "competing_path": "PLAN → DATABASE",
-            "database_work_reactive": 0.12,
-            "database_work_competing": 0.35,
-            "planning_delay": 0.05,
-            "policy_difference": "request-time allocation vs future reservation",
-        },
+        "nexora_internal": nexora_internal,
+        "difference": difference,
+        "difference_percent": percentage,
         "measured_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
 
-def render_benchmark_section():
-    render_section_header(
-        "NEXORA vs REACTIVE AGENT",
-        "Same concurrent workload, same resource capacity, different orchestration policy.",
-        "MEASURED A/B RUNTIME"
+
+def _benchmark_metric_card(label, value, sub="", accent=""):
+    return (
+        f'<div class="bench-metric {accent}">'
+        f'<div class="bench-label">{esc(label)}</div>'
+        f'<div class="bench-value">{esc(value)}</div>'
+        f'<div class="bench-sub">{esc(sub)}</div>'
+        f'</div>'
     )
 
+
+def render_benchmark_section():
+    render_section_header(
+        "REAL AI vs NEXORA",
+        "Same task. Same local AI model. Measured wall-clock execution.",
+        "LIVE RUNTIME MEASUREMENT"
+    )
+
+    current_task = st.session_state.get("task", "")
+
     st.markdown(
-        '<div class="section-callout">'
-        '<strong>What this measures:</strong> NEXORA is designed to reduce '
-        'agent workflow latency caused by shared-resource waiting. This benchmark '
-        'holds the workload and service durations constant and changes only the '
-        'runtime policy: reactive request-time allocation vs predictive reservation.'
+        '<div class="bench-hero">'
+        '<div class="bench-hero-kicker">REAL EXECUTION · NO SYNTHETIC TIMINGS</div>'
+        '<div class="bench-hero-title">How long does the AI take — and how long does it take inside NEXORA?</div>'
+        '<div class="bench-hero-sub">'
+        'Both sides use the same local Ollama model. The baseline answers the task directly. '
+        'The NEXORA run executes the same task through the actual NEXORA runtime, including '
+        'AI planning, prediction, reservation, scheduling and tool execution. Every timing is measured '
+        'with <b>time.perf_counter()</b>.'
+        '</div>'
         '</div>',
         unsafe_allow_html=True
     )
 
-    st.markdown("### Controlled workload")
-    cols = st.columns(4)
-    workload = [
-        ("Critical agent", "Research Agent"),
-        ("Competing agent", "Data Agent"),
-        ("Shared resource", "DATABASE · capacity 1"),
-        ("Critical path", "PLAN → DATABASE → REPORT"),
-    ]
-    for col, (label, value) in zip(cols, workload):
-        with col:
-            st.markdown(
-                f'<div class="metric-card"><div class="metric-label">{esc(label)}</div>'
-                f'<div class="metric-value" style="font-size:1.25rem">{esc(value)}</div></div>',
-                unsafe_allow_html=True
-            )
-
-    st.markdown("### Execution policy")
-    left, right = st.columns(2)
-    with left:
-        st.markdown(
-            '<div class="section-callout">'
-            '<strong>REACTIVE AGENT</strong><br>'
-            'The agent discovers DATABASE is needed only when it reaches that step. '
-            'The competing Data Agent can occupy the single DATABASE slot first, '
-            'so Research waits.'
-            '</div>',
-            unsafe_allow_html=True
-        )
-    with right:
-        st.markdown(
-            '<div class="section-callout">'
-            '<strong>NEXORA</strong><br>'
-            'The runtime predicts that Research will need DATABASE, reserves the '
-            'single slot first, and prevents the competing workflow from consuming '
-            'that reserved capacity.'
-            '</div>',
-            unsafe_allow_html=True
-        )
-
-    if st.button("▶ RUN MEASURED A/B BENCHMARK", use_container_width=True, type="primary"):
-        with st.spinner("Running identical workload under both runtime policies..."):
-            st.session_state.runtime_benchmark = run_runtime_benchmark(trials=5)
-
-    benchmark = st.session_state.get("runtime_benchmark")
-    if not benchmark:
-        st.info("Run the benchmark to measure the same workload under both scheduling policies.")
-        return
-
-    reactive_total = benchmark["reactive_total"]
-    nexora_total = benchmark["nexora_total"]
-    reactive_wait = benchmark["reactive_wait"]
-    nexora_wait = benchmark["nexora_wait"]
-    reduction = benchmark["latency_reduction"]
-
-    st.markdown("### Measured result")
-    cols = st.columns(4)
-    metrics = [
-        ("Reactive critical-path", f"{reactive_total:.3f}s", "baseline"),
-        ("NEXORA critical-path", f"{nexora_total:.3f}s", "predictive"),
-        ("Reactive resource wait", f"{reactive_wait:.3f}s", "measured"),
-        ("NEXORA resource wait", f"{nexora_wait:.3f}s", "measured"),
-    ]
-    for col, (label, value, sub) in zip(cols, metrics):
-        with col:
-            st.metric(label, value, sub)
+    st.markdown("### 01 · Task being measured")
+    benchmark_task = st.text_area(
+        "Benchmark problem statement",
+        value=current_task,
+        height=120,
+        key="benchmark_task_input",
+        label_visibility="collapsed",
+        placeholder="Enter the exact task you want to measure..."
+    )
 
     st.markdown(
-        f'<div class="section-callout" style="text-align:center">'
-        f'<div style="font-size:1.05rem;opacity:.82">CRITICAL WORKFLOW LATENCY REDUCTION</div>'
-        f'<div style="font-size:2.2rem;font-weight:800;color:#69ddff">{reduction:.1f}%</div>'
-        f'<div>Measured across {benchmark["trials"]} trials. The comparison is '
-        f'about orchestration/resource waiting, not raw LLM token-generation speed.</div>'
-        f'</div>',
+        '<div class="bench-note">'
+        '<b>Important:</b> This replaces the old fixed DATABASE benchmark. '
+        'Nothing in this test uses a hard-coded workflow or hard-coded result. '
+        'The model sees your actual task, and NEXORA sees the same task.'
+        '</div>',
         unsafe_allow_html=True
     )
 
-    st.markdown("### What actually happened")
-    flow_left, flow_right = st.columns(2)
-    with flow_left:
+    if st.button("▶ RUN REAL AI vs NEXORA MEASUREMENT", use_container_width=True, type="primary"):
+        try:
+            with st.spinner("Running the same task through the local AI and the real NEXORA runtime..."):
+                st.session_state.runtime_benchmark = run_ai_vs_nexora_benchmark(
+                    benchmark_task,
+                    trials=1
+                )
+        except Exception as error:
+            st.session_state.runtime_benchmark = None
+            st.error(f"Benchmark failed: {error}")
+
+    benchmark = st.session_state.get("runtime_benchmark")
+    if not benchmark or benchmark.get("mode") != "REAL_LOCAL_AI_VS_REAL_NEXORA":
         st.markdown(
-            '<div class="section-callout">'
-            '<strong>REACTIVE TRACE</strong><br><br>'
-            '1. Data Agent reaches DATABASE<br>'
-            '2. DATABASE occupied<br>'
-            '3. Research Agent reaches DATABASE<br>'
-            '4. Research waits for release<br>'
-            '5. DATABASE released<br>'
-            '6. Research executes<br>'
-            f'<br><strong>Measured wait: {reactive_wait:.3f}s</strong>'
+            '<div class="bench-empty">'
+            '<div class="bench-empty-icon">⏱</div>'
+            '<div><b>READY FOR A LIVE MEASUREMENT</b>'
+            '<span>Enter a task and run the test. The displayed numbers will come from the actual local AI and actual NEXORA execution on your machine.</span></div>'
             '</div>',
             unsafe_allow_html=True
         )
-    with flow_right:
+        return
+
+    row = benchmark["rows"][0]
+    reactive_total = benchmark["reactive_total"]
+    nexora_total = benchmark["nexora_total"]
+    difference = benchmark["difference"]
+    percent = benchmark["difference_percent"]
+    nx_result = row["nexora_result"]
+    telemetry = _benchmark_prediction_summary(nx_result)
+
+    st.markdown("### 02 · Same model, different runtime")
+    st.markdown(
+        '<div class="bench-understood">'
+        f'<div><span>MODEL</span><b>{esc(benchmark["model"])}</b></div>'
+        f'<div><span>MEASUREMENT</span><b>1 fresh wall-clock run</b></div>'
+        f'<div><span>NEXORA STEPS</span><b>{esc(nx_result.get("steps", 0))}</b></div>'
+        f'<div><span>STATUS</span><b>{"COMPLETED" if nx_result.get("completed") else "NOT COMPLETED"}</b></div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### 03 · Measured execution time")
+    nx_ollama = float(nx_result.get("ollama_time", 0.0))
+    nx_calls = int(nx_result.get("ollama_calls", 0))
+    nx_overhead = float(nx_result.get("nexora_overhead", 0.0))
+    st.markdown(
+        '<div class="bench-metrics-grid">'
+        + _benchmark_metric_card(
+            "OLLAMA DIRECT", f"{reactive_total:.3f}s",
+            "actual llama3.2:3b · direct task", "reactive-card"
+        )
+        + _benchmark_metric_card(
+            "OLLAMA INSIDE NEXORA", f"{nx_ollama:.3f}s",
+            f"{nx_calls} real model call(s)", "nexora-card"
+        )
+        + _benchmark_metric_card(
+            "NEXORA TOTAL", f"{nexora_total:.3f}s",
+            "AI + prediction + reservation + tools", "nexora-card"
+        )
+        + _benchmark_metric_card(
+            "NEXORA OVERHEAD", f"{nx_overhead:.3f}s",
+            "outside Ollama inference", "delta-card"
+        )
+        + _benchmark_metric_card(
+            "RESOURCE WAIT", f"{telemetry['wait']:.3f}s",
+            "actual wait in this run", "wait-card"
+        )
+        + '</div>', unsafe_allow_html=True
+    )
+
+    direction = "faster" if difference < 0 else "slower"
+    st.markdown(
+        '<div class="bench-verdict">'
+        '<div class="bench-verdict-label">MEASURED END-TO-END RESULT</div>'
+        f'<div class="bench-verdict-number">{abs(difference):.3f}s</div>'
+        f'<div class="bench-verdict-text">'
+        f'NEXORA was {abs(difference):.3f}s {direction} on this fresh run. '
+        'The model time and NEXORA runtime overhead are shown separately above. No timing is hard-coded.'
+        '</div></div>', unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="bench-note"><b>What the numbers mean:</b> OLLAMA DIRECT is one real model response. '
+        'OLLAMA INSIDE NEXORA is the actual time spent waiting for Ollama during the NEXORA run. '
+        'NEXORA TOTAL is the complete end-to-end runtime, including prediction, reservation, scheduling and tools.</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### 04 · What NEXORA actually added")
+    c1, c2, c3 = st.columns(3)
+    with c1:
         st.markdown(
-            '<div class="section-callout">'
-            '<strong>NEXORA TRACE</strong><br><br>'
-            '1. Predict DATABASE dependency<br>'
-            '2. Reserve DATABASE<br>'
-            '3. Data Agent cannot consume reserved slot<br>'
-            '4. Research reaches DATABASE<br>'
-            '5. DATABASE allocated immediately<br>'
-            '6. Research continues<br>'
-            f'<br><strong>Measured wait: {nexora_wait:.3f}s</strong>'
-            '</div>',
+            f'<div class="bench-side nexora"><div class="bench-side-kicker">PREDICTION</div>'
+            f'<div class="bench-side-title">{telemetry["predictions"]}</div>'
+            f'<div class="bench-side-flow">runtime prediction events</div></div>',
+            unsafe_allow_html=True
+        )
+    with c2:
+        st.markdown(
+            f'<div class="bench-side nexora"><div class="bench-side-kicker">RESERVATION</div>'
+            f'<div class="bench-side-title">{telemetry["reservations"]}</div>'
+            f'<div class="bench-side-flow">reservation events</div></div>',
+            unsafe_allow_html=True
+        )
+    with c3:
+        st.markdown(
+            f'<div class="bench-side nexora"><div class="bench-side-kicker">WAIT</div>'
+            f'<div class="bench-side-title">{telemetry["wait"]:.3f}s</div>'
+            f'<div class="bench-side-flow">resource waiting in this run</div></div>',
             unsafe_allow_html=True
         )
 
-    st.markdown("### Trial-by-trial measurements")
-    rows = []
-    for i, (r, n) in enumerate(zip(benchmark["reactive"], benchmark["nexora"]), 1):
-        rows.append({
-            "Trial": i,
-            "Reactive (s)": round(r["critical_elapsed"], 4),
-            "NEXORA (s)": round(n["critical_elapsed"], 4),
-            "Reactive wait (s)": round(r["research_wait"], 4),
-            "NEXORA wait (s)": round(n["research_wait"], 4),
-        })
-    st.dataframe(rows, use_container_width=True, hide_index=True)
+    st.markdown("### 05 · Execution comparison")
+    left, right = st.columns(2)
+    with left:
+        st.markdown(
+            '<div class="bench-side reactive">'
+            '<div class="bench-side-kicker">BASELINE</div>'
+            '<div class="bench-side-title">DIRECT AI</div>'
+            '<div class="bench-side-flow">Task → Ollama → answer</div>'
+            '<div class="bench-side-detail">No NEXORA prediction, reservation or scheduler is involved.</div>'
+            '</div>', unsafe_allow_html=True
+        )
+    with right:
+        st.markdown(
+            '<div class="bench-side nexora">'
+            '<div class="bench-side-kicker">RUNTIME</div>'
+            '<div class="bench-side-title">AI + NEXORA</div>'
+            '<div class="bench-side-flow">Task → AI → predict → reserve → schedule → tools → result</div>'
+            '<div class="bench-side-detail">The same local model runs inside the actual NEXORA orchestration pipeline.</div>'
+            '</div>', unsafe_allow_html=True
+        )
+
+    st.markdown("### 06 · NEXORA runtime trace")
+    st.code(nx_result.get("logs", "No runtime log captured."), language="text")
+
+    with st.expander("Direct AI response"):
+        st.write(row["reactive_response"])
 
     with st.expander("Benchmark methodology"):
         st.write(
-            "Both policies execute the same two-agent workload with DATABASE capacity 1, "
-            "the same planning delay and the same simulated service durations. The baseline "
-            "is reactive: it only requests DATABASE at execution time. NEXORA reserves DATABASE "
-            "before the competing workflow can claim it. Timings are measured with Python's "
-            "perf_counter() across five fresh trials. Historical prediction data is not used to "
-            "fabricate the timing result."
+            "The baseline measures one direct Ollama response to the exact task. "
+            "The NEXORA measurement runs the exact same task through the actual NEXORA runtime. "
+            "Both measurements use time.perf_counter() on the local machine. The NEXORA timing includes "
+            "its real AI decisions, resource management, predictions, reservations and tool execution. "
+            "Because these are different execution paths, the comparison is an end-to-end runtime measurement, "
+            "not a raw LLM inference-speed benchmark."
         )
         st.write(f"Measured at: {benchmark['measured_at']}")
-
 
 def render_section_navigation():
     """Render the judge-facing section switcher."""
